@@ -18,6 +18,8 @@ import {MySequence} from './sequence';
 import {JWTAuthenticationStrategy} from './services/authentication/jwt.auth.strategy';
 import {JWTService} from './services/authentication/jwt.service';
 import {SecuritySpecEnhancer} from './services/authentication/security.spec.enhancer';
+import {AuthorizationOptions, AuthorizationDecision, AuthorizationComponent, AuthorizationTags} from '@loopback/authorization';
+import {MyAuthorizationProvider} from './services/my-authorizer-provider.service';
 
 export {ApplicationConfig};
 
@@ -69,5 +71,17 @@ export class MusicPlayerApplication extends BootMixin(
     this.bind(TokenServiceBindings.TOKEN_SERVICE).toClass(JWTService);
 
     registerAuthenticationStrategy(this, JWTAuthenticationStrategy);
+
+    const authorizationOptions: AuthorizationOptions = {
+      precedence: AuthorizationDecision.DENY,
+      defaultDecision: AuthorizationDecision.DENY,
+    };
+
+    const binding = this.component(AuthorizationComponent);
+    this.configure(binding.key).to(authorizationOptions);
+
+    this.bind('authorizationProviders.my-authorizer-provider')
+      .toProvider(MyAuthorizationProvider)
+      .tag(AuthorizationTags.AUTHORIZER);
   }
 }

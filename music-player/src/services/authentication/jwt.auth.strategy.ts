@@ -30,12 +30,12 @@ export class JWTAuthenticationStrategy implements AuthenticationStrategy {
   async authenticate(
     request: Request,
   ): Promise<UserProfile | AuthCredentials | undefined | any> {
-    console.log('IN authenticate');
+    // console.log('IN authenticate');
     return this.performJWTStreategy(request);
   }
 
   async performJWTStreategy(request: Request) {
-    console.log('performJWTStreategy');
+    // console.log('performJWTStreategy');
     if (!request.headers.authorization) {
       throw new HttpErrors[400](`Authorization header not found.`);
     }
@@ -69,6 +69,7 @@ export class JWTAuthenticationStrategy implements AuthenticationStrategy {
       return {
         user,
         session,
+        userType: user.userType
       };
     } catch (err: any) {
       throw new HttpErrors[400](`BadRequest`);

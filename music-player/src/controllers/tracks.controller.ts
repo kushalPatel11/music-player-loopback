@@ -1,3 +1,5 @@
+import {authenticate} from '@loopback/authentication';
+import {authorize} from '@loopback/authorization';
 import {
   Count,
   CountSchema,
@@ -7,20 +9,16 @@ import {
   Where,
 } from '@loopback/repository';
 import {
-  post,
-  param,
+  del,
   get,
   getModelSchemaRef,
-  patch,
-  put,
-  del,
+  param,
+  post,
   requestBody,
-  response,
+  response
 } from '@loopback/rest';
-import { authorize } from '@loopback/authorization';
 import {Tracks} from '../models';
 import {TracksRepository} from '../repositories';
-import {authenticate} from '@loopback/authentication';
 
 @authenticate('jwt')
 export class TracksController {
@@ -29,6 +27,9 @@ export class TracksController {
     public tracksRepository : TracksRepository,
   ) {}
 
+  @authorize({
+    allowedRoles: ['artist'],
+  })
   @post('/tracksUpload')
   @response(200, {
     description: 'Tracks model instance',
@@ -79,25 +80,6 @@ export class TracksController {
     return this.tracksRepository.find(filter);
   }
 
-  @patch('/tracks')
-  @response(200, {
-    description: 'Tracks PATCH success count',
-    content: {'application/json': {schema: CountSchema}},
-  })
-  async updateAll(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(Tracks, {partial: true}),
-        },
-      },
-    })
-    tracks: Tracks,
-    @param.where(Tracks) where?: Where<Tracks>,
-  ): Promise<Count> {
-    return this.tracksRepository.updateAll(tracks, where);
-  }
-
   @get('/tracks/{id}')
   @response(200, {
     description: 'Tracks model instance',
@@ -112,35 +94,6 @@ export class TracksController {
     @param.filter(Tracks, {exclude: 'where'}) filter?: FilterExcludingWhere<Tracks>
   ): Promise<Tracks> {
     return this.tracksRepository.findById(id, filter);
-  }
-
-  @patch('/tracks/{id}')
-  @response(204, {
-    description: 'Tracks PATCH success',
-  })
-  async updateById(
-    @param.path.string('id') id: string,
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(Tracks, {partial: true}),
-        },
-      },
-    })
-    tracks: Tracks,
-  ): Promise<void> {
-    await this.tracksRepository.updateById(id, tracks);
-  }
-
-  @put('/tracks/{id}')
-  @response(204, {
-    description: 'Tracks PUT success',
-  })
-  async replaceById(
-    @param.path.string('id') id: string,
-    @requestBody() tracks: Tracks,
-  ): Promise<void> {
-    await this.tracksRepository.replaceById(id, tracks);
   }
 
   @del('/tracks/{id}')
