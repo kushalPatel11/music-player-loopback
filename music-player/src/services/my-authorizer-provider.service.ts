@@ -20,7 +20,7 @@ export class MyAuthorizationProvider implements Provider<Authorizer> {
     const userRole = authorizationCtx.principals[0].userType;
     const allowedRoles = <string[]>metadata.allowedRoles;
     let checkRole = true;
-    if (userRole === allowedRoles) {
+    if (allowedRoles.includes(userRole)) {
       checkRole = true;
     } else {
       checkRole = false;

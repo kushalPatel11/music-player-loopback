@@ -21,15 +21,15 @@ import {Tracks} from '../models';
 import {TracksRepository} from '../repositories';
 
 @authenticate('jwt')
+@authorize({
+  allowedRoles: ['artist'],
+})
 export class TracksController {
   constructor(
     @repository(TracksRepository)
     public tracksRepository : TracksRepository,
   ) {}
 
-  @authorize({
-    allowedRoles: ['artist'],
-  })
   @post('/tracksUpload')
   @response(200, {
     description: 'Tracks model instance',
@@ -100,7 +100,9 @@ export class TracksController {
   @response(204, {
     description: 'Tracks DELETE success',
   })
-  async deleteById(@param.path.string('id') id: string): Promise<void> {
+  async deleteById(
+    @param.path.string('id') id: string
+    ): Promise<void> {
     await this.tracksRepository.deleteById(id);
   }
 }
