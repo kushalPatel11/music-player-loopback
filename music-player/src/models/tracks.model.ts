@@ -1,7 +1,5 @@
 import {Entity, model, property} from '@loopback/repository';
-import { TracksDuration } from './tracksDuration.model';
-import { Ratings } from './ratings.model';
-import { DateTime } from 'luxon';
+import {DateTime} from 'luxon';
 
 @model()
 export class Tracks extends Entity {
@@ -18,10 +16,10 @@ export class Tracks extends Entity {
     index: {
       unique: true,
     },
-    jsonSchema:{
+    jsonSchema: {
       pattern: '^(?! ).*[^ ]$',
-      errorMessage:{
-        pattern: `Title must not be empty`
+      errorMessage: {
+        pattern: `Title must not be empty`,
       },
     },
   })
@@ -38,82 +36,40 @@ export class Tracks extends Entity {
     type: 'string',
     required: true,
     jsonSchema: {
-      enum:['mp3', 'AAC', 'WAV'],
+      enum: ['mp3', 'AAC', 'WAV'],
       errorMessage: {
-        pattern: `choose from mp3, AAC or WAV only!!`
+        pattern: `choose from mp3, AAC or WAV only!!`,
       },
     },
     default: 'mp3',
   })
-  fileType: string;
-
-  @property({
-
-  })
-  duration: TracksDuration;
-
-  @property({
-    type: 'string',
-    required: false,
-    jsonSchema: {
-      enum: ['srt', 'txt'],
-      errorMessage:{
-        pattern : `only srt and txt file types are allowed`
-      },
-    },
-  })
-  lyricsFileType: string;
+  fileExtension: string;
 
   @property({
     type: 'string',
     required: true,
-    jsonSchema:{
+    jsonSchema: {
       enum: ['English', 'Hindi'],
       errorMessage: {
-        pattern: `Only English and Hindi languages allowed`
+        pattern: `Only English and Hindi languages allowed`,
       },
     },
-    default: 'Hindi'
+    default: 'Hindi',
   })
   language: string;
 
   @property({
     type: 'string',
     required: true,
-    jsonSchema:{
+    jsonSchema: {
       pattern: '^(?! ).*[^ ]$',
-      errorMessage:{
-        pattern:`Should not be empty`
+      errorMessage: {
+        pattern: `Should not be empty`,
       },
     },
-    default: 'Retro Bollywood'
+    default: 'Retro Bollywood',
   })
   genre: string;
-
-  @property({
-    
-  })
-  ratings: Ratings;
-
-  @property({
-    type: 'number',
-    required: true,
-    default: 0
-  })
-  numberOfPlays: number;
-
-  @property({
-    type: 'date',
-    required: true,
-    default: DateTime.utc().toISO()
-  })
-  publishedDate: DateTime;
-
-  @property({
-    type: 'number',
-    required: false,
-  })
-  numberOfDownloads: number;
 
   @property({
     type: 'date',

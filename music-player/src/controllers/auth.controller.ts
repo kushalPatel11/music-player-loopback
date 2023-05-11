@@ -3,7 +3,6 @@ import {inject, service} from '@loopback/core';
 import {
   get,
   getModelSchemaRef,
-  param,
   post,
   requestBody,
   response,
@@ -26,7 +25,7 @@ export class AuthController {
   //SignUp/Register API Endpoint
   @post('/auth/sign-up')
   @response(200, {
-    description: 'SignUp/Register API Endpoint',
+    summary: 'SignUp/Register API Endpoint',
     content: {
       'application/json': {
         schema: getModelSchemaRef(Users, {
@@ -254,16 +253,15 @@ export class AuthController {
   //  ResetPassword API Endpoint
   @post('/auth/reset-password')
   @response(200, {
-    description:
-      'Reset user password',
+    description: 'Reset user password',
     content: {
       'application/json': {
         schema: {
           type: 'object',
           properties: {
-            token:{
-              type:'string',
-              default:'',
+            token: {
+              type: 'string',
+              default: '',
             },
             newPassword: {
               type: 'string',
@@ -286,9 +284,9 @@ export class AuthController {
             type: 'object',
             required: ['token', 'newPassword', 'confirmPassword'],
             properties: {
-              token:{
-                type:'string',
-                default:'',
+              token: {
+                type: 'string',
+                default: '',
               },
               newPassword: {
                 type: 'string',
@@ -309,7 +307,7 @@ export class AuthController {
       },
     })
     payload: {
-      token:string;
+      token: string;
       newPassword: string;
       confirmPassword: string;
     },
@@ -367,7 +365,7 @@ export class AuthController {
         },
       },
     })
-    payload:{
+    payload: {
       oldPassword: string;
       newPassword: string;
     },
@@ -376,7 +374,7 @@ export class AuthController {
   ): Promise<any> {
     return this.userService.changePassword({
       payload,
-      userId: <string>authCredentials.user.id
+      userId: <string>authCredentials.user.id,
     });
   }
 

@@ -5,8 +5,8 @@ import {HttpErrors, Request, RestBindings} from '@loopback/rest';
 import {UserProfile, securityId} from '@loopback/security';
 import {TokenServiceBindings} from '../../keys';
 import {Session, Users} from '../../models';
-import {SessionRepository} from '../../repositories';
-import {UserAuthenticationService} from '../user-authentication.service';
+import {SessionRepository, UsersRepository} from '../../repositories';
+import {UserService} from '../user.service';
 
 export type AuthCredentials = {
   user: Users;
@@ -21,10 +21,12 @@ export class JWTAuthenticationStrategy implements AuthenticationStrategy {
     @inject(RestBindings.Http.REQUEST) private req: Request,
     @inject(TokenServiceBindings.TOKEN_SERVICE)
     public tokenService: TokenService,
-    @service(UserAuthenticationService)
-    public userAuthenticationService: UserAuthenticationService,
     @repository(SessionRepository)
     public sessionRepository: SessionRepository,
+    @repository(UsersRepository)
+    public usersRepository: UsersRepository,
+    @service(UserService)
+    public userService: UserService,
   ) {}
 
   async authenticate(
@@ -63,13 +65,11 @@ export class JWTAuthenticationStrategy implements AuthenticationStrategy {
       const session = <Session>(
         await this.sessionRepository.findSessionByToken(token)
       );
-      let user = await this.userAuthenticationService.findUserById(
-        userProfile[securityId],
-      );
+      let user = await this.userService.findUserById(userProfile[securityId]);
       return {
         user,
         session,
-        userType: user.userType
+        userType: user.userType,
       };
     } catch (err: any) {
       throw new HttpErrors[400](`BadRequest`);

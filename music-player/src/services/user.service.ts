@@ -11,7 +11,7 @@ import {
   customErrorMsg,
   musicPlayerConstant,
 } from '../keys';
-import {Users} from '../models';
+import {Users, UsersWithRelations} from '../models';
 import {
   SessionRepository,
   UserCredentialsRepository,
@@ -50,7 +50,7 @@ type forgotPasswordParams = {
 
 type resetPasswordParams = {
   payload: {
-    token:string;
+    token: string;
     newPassword: string;
     confirmPassword: string;
   };
@@ -62,6 +62,10 @@ type changePasswordParams = {
     newPassword: string;
   };
   userId: string;
+};
+
+type findUserTypeParams = {
+  userType: string;
 };
 
 @injectable({scope: BindingScope.TRANSIENT})
@@ -216,7 +220,7 @@ export class UserService {
     }
     const verifyToken = await this.usersRepository.findOne({
       where: <any>{
-        'forgotPasswordToken.token':  payload.token,
+        'forgotPasswordToken.token': payload.token,
         'forgotPasswordToken.status': musicPlayerConstant.SessionStatus.CURRENT,
       },
     });
@@ -271,10 +275,10 @@ export class UserService {
     return musicPlayerConstant.AuthStatus.PASSWORD_CHANGE_SUCCESSFULL;
   }
 
-  async changePassword({payload,userId}: changePasswordParams) {
+  async changePassword({payload, userId}: changePasswordParams) {
     const checkUserId = await this.userCredentialsRepository.findOne({
       where: {
-        userId
+        userId,
       },
     });
     if (!checkUserId) {
@@ -319,6 +323,30 @@ export class UserService {
       oldPasswords: passwordArray,
     });
     return musicPlayerConstant.AuthStatus.PASSWORD_CHANGE_SUCCESSFULL;
+  }
+
+  async findUserType({userType}: findUserTypeParams) {
+    const checkUserType = await this.usersRepository.find({
+      where: {
+        userType: userType,
+      },
+      fields: {
+        id: true,
+      },
+    });
+    return checkUserType;
+  }
+
+  async findUserById(id: string): Promise<Users & UsersWithRelations> {
+    const userNotfound = 'invalid User';
+    const foundUser = await this.usersRepository.findOne({
+      where: {id: id},
+    });
+
+    if (!foundUser) {
+      throw new HttpErrors.Unauthorized(userNotfound);
+    }
+    return foundUser;
   }
 
   convertToUserProfile(user: Users): UserProfile {
