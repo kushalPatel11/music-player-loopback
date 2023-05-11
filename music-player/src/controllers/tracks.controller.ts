@@ -3,7 +3,6 @@ import {authorize} from '@loopback/authorization';
 import {service} from '@loopback/core';
 import {Filter, FilterExcludingWhere, repository} from '@loopback/repository';
 import {
-  OperationVisibility,
   del,
   get,
   getModelSchemaRef,
@@ -11,8 +10,8 @@ import {
   post,
   requestBody,
   response,
-  visibility,
 } from '@loopback/rest';
+import {customErrorMsg} from '../keys';
 import {Tracks} from '../models';
 import {TracksRepository} from '../repositories';
 import {TracksService} from '../services';
@@ -29,11 +28,42 @@ export class TracksController {
     public tracksService: TracksService,
   ) {}
 
-  @visibility(OperationVisibility.UNDOCUMENTED)
   @post('/tracks-upload')
   @response(200, {
-    description: 'Tracks model instance',
-    content: {'application/json': {schema: getModelSchemaRef(Tracks)}},
+    description: 'Upload track endpoint',
+    content: {
+      'application/json': {
+        schema: {
+          type: 'object',
+          properties: {
+            title: {
+              type: 'string',
+              default: '',
+            },
+            artistIds: {
+              type: 'array',
+              // item: 'string',
+              default: [],
+            },
+            description: {
+              type: 'string',
+              default: '',
+            },
+            fileExtension: {
+              type: 'string',
+              default: 'mp3',
+            },
+            language: {
+              type: 'string',
+              default: 'english',
+            },
+            genre: {
+              type: 'string',
+            },
+          },
+        },
+      },
+    },
   })
   async create(
     @requestBody({
@@ -54,7 +84,7 @@ export class TracksController {
                 type: 'string',
                 pattern: '^(?! ).*[^ ]$',
                 errorMessage: {
-                  pattern: `can't be blank`,
+                  pattern: customErrorMsg.trackErrors.EMPTY_TRACK_TITLE,
                 },
                 default: '',
               },
@@ -63,40 +93,40 @@ export class TracksController {
                 minItems: 1,
                 pattern: '^([0-9a-fA-F]{24})$',
                 errorMessage: {
-                  pattern: `must be a valid MongoDB Id`,
+                  pattern: customErrorMsg.trackErrors.INVALID_ARTIST_ID,
                 },
+                default: [],
               },
               description: {
                 type: 'string',
                 pattern: '^(?! ).*[^ ]$',
                 errorMessage: {
-                  pattern: `can't be blank`,
+                  pattern: customErrorMsg.trackErrors.EMPTY_DESCRIPTION,
                 },
                 default: '',
               },
               fileExtension: {
                 type: 'string',
-                enum: [],
+                enum: ['mp3', 'WAV', 'AAC'],
                 errorMessage: {
-                  pattern: '',
+                  pattern: customErrorMsg.trackErrors.INVALID_FILE_EXTENSION,
                 },
-                default: '',
+                default: 'mp3',
               },
               language: {
                 type: 'string',
-                enum: [],
+                enum: ['english', 'hindi'],
                 errorMessage: {
-                  pattern: '',
+                  pattern: customErrorMsg.trackErrors.LANGUAGE_NOT_ALLOWED,
                 },
-                default: '',
+                default: 'english',
               },
               genre: {
                 type: 'string',
-                enum: [],
+                enum: ['rock', 'pop', 'jazz', 'romantic', 'lofi', 'spiritual'],
                 errorMessage: {
-                  pattern: '',
+                  pattern: customErrorMsg.trackErrors.GENRE_NOT_ALLOWED,
                 },
-                default: '',
               },
             },
           },

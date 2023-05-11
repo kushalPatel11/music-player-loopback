@@ -16,10 +16,13 @@ import {
   del,
   requestBody,
   response,
+  visibility,
+  OperationVisibility,
 } from '@loopback/rest';
 import {PlaylistHasTracks} from '../models';
 import {PlaylistHasTracksRepository} from '../repositories';
 
+@visibility(OperationVisibility.UNDOCUMENTED)
 export class PlaylistHasTracksController {
   constructor(
     @repository(PlaylistHasTracksRepository)

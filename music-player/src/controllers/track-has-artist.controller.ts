@@ -16,10 +16,13 @@ import {
   del,
   requestBody,
   response,
+  OperationVisibility,
+  visibility,
 } from '@loopback/rest';
 import {TrackHasArtist} from '../models';
 import {TrackHasArtistRepository} from '../repositories';
 
+@visibility(OperationVisibility.UNDOCUMENTED)
 export class TrackHasArtistController {
   constructor(
     @repository(TrackHasArtistRepository)
@@ -37,7 +40,7 @@ export class TrackHasArtistController {
         'application/json': {
           schema: getModelSchemaRef(TrackHasArtist, {
             title: 'NewTrackHasArtist',
-            
+
           }),
         },
       },

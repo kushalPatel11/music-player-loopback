@@ -1,6 +1,6 @@
 {
   "name": "music-player",
-  "version": "0.0.2",
+  "version": "1.2.2",
   "description": "creating a working CRUD and authentication backend system",
   "keywords": [
     "loopback-application",

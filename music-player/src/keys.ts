@@ -60,6 +60,18 @@ export namespace customErrorMsg {
     ALREADY_EXPIRED_SESSION = 'Your session has expired. LogIn again to continue!!',
     ALREADY_LOGGED_OUT = 'You have already logged out with this session ID',
   }
+
+
+  export enum trackErrors {
+    EMPTY_TRACK_TITLE = 'Invalid title! Must not be empty and should not contain white space before or after the title',
+    INVALID_ARTIST_ID = 'Artist Id must be a valid MongoDB Id!!',
+    ARTIST_ID_NOT_FOUND = 'Artist does not exist!',
+    LANGUAGE_NOT_ALLOWED = 'Only english and hindi languages are allowed',
+    GENRE_NOT_ALLOWED = 'Only rock, pop, jazz, romantic, lofi, spiritual genre are allowed',
+    EMPTY_DESCRIPTION = 'Description must not be empty',
+    INVALID_FILE_EXTENSION = 'Current file extension not allowed!! Only mp3, WAV and AAc file extensions are allowed!!',
+    DUPLICATE_ARTIST_ID = 'artist Ids must be used only once in the array. Duplication of the artist Id is not allowed!!'
+  }
 }
 
 export namespace musicPlayerConstant {
