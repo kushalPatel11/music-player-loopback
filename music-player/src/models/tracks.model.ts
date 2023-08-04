@@ -72,6 +72,19 @@ export class Tracks extends Entity {
   genre: string;
 
   @property({
+    type: 'string',
+    required: true,
+    jsonSchema: {
+      enum: ['pending', 'released'],
+      errorMessage: {
+        pattern: `Choose from pending or released only!!`,
+      },
+    },
+    default: 'pending',
+  })
+  status: string;
+
+  @property({
     type: 'date',
     required: true,
     default: () => DateTime.utc().toJSDate(),

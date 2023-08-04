@@ -38,6 +38,7 @@ export namespace RefreshTokenConstants {
 export namespace customErrorMsg {
   export enum authErrors {
     USER_PASSWORD_NOT_SET = 'User does not have password setup.',
+    USER_ID_NOT_FOUND = 'User Id not found!',
     WHITESPACE_ERROR = 'White space not allowed before or after the name',
     ENTER_USER_ID = 'Enter User Id',
     INVALID_USER_TYPE = 'Select from "user" or "artist" only',
@@ -61,7 +62,6 @@ export namespace customErrorMsg {
     ALREADY_LOGGED_OUT = 'You have already logged out with this session ID',
   }
 
-
   export enum trackErrors {
     EMPTY_TRACK_TITLE = 'Invalid title! Must not be empty and should not contain white space before or after the title',
     INVALID_ARTIST_ID = 'Artist Id must be a valid MongoDB Id!!',
@@ -70,7 +70,23 @@ export namespace customErrorMsg {
     GENRE_NOT_ALLOWED = 'Only rock, pop, jazz, romantic, lofi, spiritual genre are allowed',
     EMPTY_DESCRIPTION = 'Description must not be empty',
     INVALID_FILE_EXTENSION = 'Current file extension not allowed!! Only mp3, WAV and AAc file extensions are allowed!!',
-    DUPLICATE_ARTIST_ID = 'artist Ids must be used only once in the array. Duplication of the artist Id is not allowed!!'
+    INVALID_ARTIST_IDS = 'Must contain only artistId and not userId!!',
+    LOGGED_IN_USER_ID_REQUIRED = 'Must include logged in userId',
+    COLLABORATION_TOKEN_ERROR = 'Invalid Token!',
+    COLLABORATION_REQUEST_NOT_FOUND = 'You do not have any collaboration requests over here!!',
+    COLLABORATION_REQUEST_ENUM_ERROR = 'Invalid status!! Choose from `accepted` or `rejected` only',
+  }
+
+  export enum playlistErrors {
+    EMPTY_PLAYLIST_NAME = 'Invalid name! Must not be empty and should not contain white space before or after the name',
+    EMPTY_DESCRIPTION = 'Description should not be empty or contain white spaces before or after the description!',
+    INVALID_EMAIL_ID = 'Invalid Email! The mentioned email is not registered as user.',
+    PLAYLIST_NOT_FOUND = 'Playlist not found!',
+    INVALID_PLAYLIST_ID = 'Invalid playlist Id',
+  }
+
+  export enum commonFunctionErrors {
+    DUPLICATE_ID = 'Ids must be used only once in the array. Duplication of the Id is not allowed!!',
   }
 }
 
@@ -85,5 +101,9 @@ export namespace musicPlayerConstant {
     LOG_IN_SUCCESS = 'you have logged in successfully',
     LOG_OUT_SUCCESS = 'you have logged out successfully',
     PASSWORD_CHANGE_SUCCESSFULL = 'Password has been changed successfully!!',
+  }
+
+  export enum TrackStatus {
+    COLLABORATION_RESPONSE = 'response sent successfully!!',
   }
 }

@@ -1,151 +1,156 @@
-import {
-  Count,
-  CountSchema,
-  Filter,
-  FilterExcludingWhere,
-  repository,
-  Where,
-} from '@loopback/repository';
-import {
-  post,
-  param,
-  get,
-  getModelSchemaRef,
-  patch,
-  put,
-  del,
-  requestBody,
-  response,
-} from '@loopback/rest';
-import {Playlists} from '../models';
+import {authenticate} from '@loopback/authentication';
+import {authorize} from '@loopback/authorization';
+import {inject, service} from '@loopback/core';
+import {repository} from '@loopback/repository';
+import {del, param, post, requestBody, response} from '@loopback/rest';
+import {SecurityBindings} from '@loopback/security';
+import {customErrorMsg} from '../keys';
 import {PlaylistsRepository} from '../repositories';
+import {PlaylistService} from '../services';
+import {AuthCredentials} from '../services/authentication/jwt.auth.strategy';
 
+@authenticate('jwt')
+@authorize({
+  allowedRoles: ['user'],
+})
 export class PlaylistController {
+  userId: any;
   constructor(
+    @inject(SecurityBindings.USER)
+    public authCredentials: AuthCredentials,
     @repository(PlaylistsRepository)
-    public playlistsRepository : PlaylistsRepository,
-  ) {}
+    public playlistsRepository: PlaylistsRepository,
+    @service(PlaylistService)
+    public playlistService: PlaylistService,
+  ) {
+    this.userId = <string>authCredentials.user.id;
+  }
 
-  @post('/playlists')
-  @response(200, {
-    description: 'Playlists model instance',
-    content: {'application/json': {schema: getModelSchemaRef(Playlists)}},
+  @post('/create-playlist', {
+    summary: 'create playlist',
+    responses: {
+      '200': {
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              required: ['name', 'description'],
+              properties: {
+                name: {
+                  type: 'string',
+                  default: '',
+                },
+                description: {
+                  type: 'string',
+                  default: '',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   })
   async create(
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Playlists, {
-            title: 'NewPlaylists',
-            exclude: ['id','createdAt','updatedAt'],
-          }),
+          schema: {
+            type: 'object',
+            required: ['name', 'description'],
+            properties: {
+              name: {
+                type: 'string',
+                pattern: '^(?! ).*[^ ]$',
+                errorMessage: {
+                  pattern: customErrorMsg.playlistErrors.EMPTY_PLAYLIST_NAME,
+                },
+                default: '',
+              },
+              description: {
+                type: 'string',
+                pattern: '^(?! ).*[^ ]$',
+                errorMessage: {
+                  pattern: customErrorMsg.playlistErrors.EMPTY_DESCRIPTION,
+                },
+                default: '',
+              },
+            },
+          },
         },
       },
     })
-    playlists: Playlists,
-  ): Promise<Playlists> {
-    return this.playlistsRepository.create(playlists);
+    payload: {
+      name: string;
+      description: string;
+    },
+  ): Promise<any> {
+    return this.playlistService.createPlaylist({
+      payload,
+      createdBy: this.userId,
+      updatedBy: this.userId,
+      userId: this.userId,
+    });
   }
 
-  @get('/playlists/count')
-  @response(200, {
-    description: 'Playlists model count',
-    content: {'application/json': {schema: CountSchema}},
-  })
-  async count(
-    @param.where(Playlists) where?: Where<Playlists>,
-  ): Promise<Count> {
-    return this.playlistsRepository.count(where);
-  }
-
-  @get('/playlists')
-  @response(200, {
-    description: 'Array of Playlists model instances',
-    content: {
-      'application/json': {
-        schema: {
-          type: 'array',
-          items: getModelSchemaRef(Playlists, {includeRelations: true}),
+  @post('/invite-users-to-playlist', {
+    summary: 'Invite users to your playlist',
+    responses: {
+      '200': {
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              required: ['emailsToInvite', 'playlistId'],
+              proprties: {
+                emailsToInvite: {
+                  type: 'array',
+                },
+                playlistId: {
+                  type: 'string',
+                },
+              },
+            },
+          },
         },
       },
     },
   })
-  async find(
-    @param.filter(Playlists) filter?: Filter<Playlists>,
-  ): Promise<Playlists[]> {
-    return this.playlistsRepository.find(filter);
-  }
-
-  @patch('/playlists')
-  @response(200, {
-    description: 'Playlists PATCH success count',
-    content: {'application/json': {schema: CountSchema}},
-  })
-  async updateAll(
+  async inviteUserToPlaylist(
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Playlists, {partial: true}),
+          schema: {
+            type: 'object',
+            required: ['emailsToInvite'],
+            properties: {
+              emailsToInvite: {
+                type: 'array',
+                minItems: 1,
+                default: [],
+              },
+              playlistId: {
+                type: 'string',
+                pattern: '^([0-9a-fA-F]{24})$',
+                errorMessage: {
+                  pattern: customErrorMsg.playlistErrors.INVALID_PLAYLIST_ID,
+                },
+                default: '',
+              },
+            },
+          },
         },
       },
     })
-    playlists: Playlists,
-    @param.where(Playlists) where?: Where<Playlists>,
-  ): Promise<Count> {
-    return this.playlistsRepository.updateAll(playlists, where);
-  }
-
-  @get('/playlists/{id}')
-  @response(200, {
-    description: 'Playlists model instance',
-    content: {
-      'application/json': {
-        schema: getModelSchemaRef(Playlists, {includeRelations: true}),
-      },
+    payload: {
+      emailToInvite: string[];
+      playlistId: string;
     },
-  })
-  async findById(
-    @param.path.string('id') id: string,
-    @param.filter(Playlists, {exclude: 'where'}) filter?: FilterExcludingWhere<Playlists>
-  ): Promise<Playlists> {
-    return this.playlistsRepository.findById(id, filter);
-  }
-
-  @patch('/playlists/{id}')
-  @response(204, {
-    description: 'Playlists PATCH success',
-  })
-  async updateById(
-    @param.path.string('id') id: string,
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(Playlists, {partial: true}),
-        },
-      },
-    })
-    playlists: Playlists,
-  ): Promise<void> {
-    await this.playlistsRepository.updateById(id, playlists);
-  }
-
-  @put('/playlists/{id}')
-  @response(204, {
-    description: 'Playlists PUT success',
-    content: {
-        'application/json': {
-          schema: getModelSchemaRef(Playlists, {
-            title: 'NewPlaylists',
-            exclude: ['id','createdAt','updatedAt'],
-          }),
-        },
-      },
-  })
-  async replaceById(
-    @param.path.string('id') id: string,
-    @requestBody() playlists: Playlists,
-  ): Promise<void> {
-    await this.playlistsRepository.replaceById(id, playlists);
+  ): Promise<any> {
+    return this.playlistService.inviteUserToPlaylist({
+      payload,
+      loggedInUserId: this.userId,
+    });
   }
 
   @del('/playlists/{id}')

@@ -1,12 +1,6 @@
 import {TokenService, authenticate} from '@loopback/authentication';
 import {inject, service} from '@loopback/core';
-import {
-  get,
-  getModelSchemaRef,
-  post,
-  requestBody,
-  response,
-} from '@loopback/rest';
+import {get, post, requestBody} from '@loopback/rest';
 import {SecurityBindings} from '@loopback/security';
 import {DateTime} from 'luxon';
 import {TokenServiceBindings, customErrorMsg} from '../keys';
@@ -23,14 +17,101 @@ export class AuthController {
   ) {}
 
   //SignUp/Register API Endpoint
-  @post('/auth/sign-up')
-  @response(200, {
+  @post('/auth/sign-up', {
     summary: 'SignUp/Register API Endpoint',
-    content: {
-      'application/json': {
-        schema: getModelSchemaRef(Users, {
-          includeRelations: true,
-        }),
+    responses: {
+      '200': {
+        content: {
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: [
+                  'firstName',
+                  'lastName',
+                  'userType',
+                  'email',
+                  'password',
+                  'dateOfBirth',
+                  'phoneNumber',
+                  'countryCode',
+                  'gender',
+                ],
+                properties: {
+                  firstName: {
+                    type: 'string',
+                    pattern: '^(?! ).*[^ ]$',
+                    errorMessage: {
+                      pattern: `can't be blank`,
+                    },
+                    default: '',
+                  },
+                  lastName: {
+                    type: 'string',
+                    pattern: '^(?! ).*[^ ]$',
+                    errorMessage: {
+                      pattern: `can't be blank`,
+                    },
+                    default: '',
+                  },
+                  userType: {
+                    type: 'string',
+                    enum: ['user', 'artist'],
+                    errorMessage: {
+                      pattern: customErrorMsg.authErrors.INVALID_USER_TYPE,
+                    },
+                  },
+                  email: {
+                    type: 'string',
+                    format: 'email',
+                    errorMessage: {
+                      pattern: customErrorMsg.authErrors.INVALID_EMAIL,
+                    },
+                    default: 'user@linearloop.io'
+                  },
+                  password: {
+                    type: 'string',
+                    pattern:
+                      '^((?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,})$',
+                    errorMessage: {
+                      pattern:
+                        customErrorMsg.authErrors.PASSWORD_VALIDATION_FAILED,
+                    },
+                    default: 'Admin@123',
+                  },
+                  dateOfBirth: {
+                    'x-ts-type': Date,
+                    nullable: true,
+                    errorMessage: {
+                      pattern: customErrorMsg.authErrors.INVALID_DOB_FORMAT,
+                    },
+                  },
+                  phoneNumber: {
+                    type: 'string',
+                    pattern: '^\\d{10}$',
+                    errorMessage: {
+                      pattern: customErrorMsg.authErrors.INVALID_PHONE_NUMBER,
+                    },
+                  },
+                  countryCode: {
+                    type: 'string',
+                    pattern: '^\\+\\d{1,3}$',
+                    errorMessage: {
+                      pattern: customErrorMsg.authErrors.INVALID_COUNTRY_CODE,
+                    },
+                  },
+                  gender: {
+                    type: 'string',
+                    enum: ['male', 'female', 'other'],
+                    errorMessage: {
+                      pattern: `Select from male, female, or other only`,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     },
   })
@@ -74,6 +155,7 @@ export class AuthController {
                 errorMessage: {
                   pattern: customErrorMsg.authErrors.INVALID_USER_TYPE,
                 },
+                default: 'artist',
               },
               email: {
                 type: 'string',
@@ -81,6 +163,7 @@ export class AuthController {
                 errorMessage: {
                   pattern: customErrorMsg.authErrors.INVALID_EMAIL,
                 },
+                default: 'user@linearloop.io'
               },
               password: {
                 type: 'string',
@@ -89,7 +172,7 @@ export class AuthController {
                 errorMessage: {
                   pattern: customErrorMsg.authErrors.PASSWORD_VALIDATION_FAILED,
                 },
-                default: '',
+                default: 'Admin@123',
               },
               dateOfBirth: {
                 'x-ts-type': Date,
@@ -142,21 +225,26 @@ export class AuthController {
   }
 
   //Login API Endpoint
-  @post('/auth/login')
-  @response(200, {
-    description: 'Login API Endpoint',
-    content: {
-      'application/json': {
-        schema: {
-          type: 'object',
-          properties: {
-            email: {
-              type: 'string',
-              format: 'email',
-            },
-            password: {
-              type: 'string',
-              default: '',
+  @post('/auth/login', {
+    summary: 'User Login',
+    responses: {
+      '200': {
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              required: ['email', 'password'],
+              properties: {
+                email: {
+                  type: 'string',
+                  format: 'email',
+                  default: 'user@linearloop.io',
+                },
+                password: {
+                  type: 'string',
+                  default: '',
+                },
+              },
             },
           },
         },
@@ -174,11 +262,11 @@ export class AuthController {
               email: {
                 type: 'string',
                 format: 'email',
-                default: 'rahul@linearloop.io',
+                default: 'user@linearloop.io',
               },
               password: {
                 type: 'string',
-                default: 'Admin@1234',
+                default: '',
               },
             },
           },
@@ -195,9 +283,11 @@ export class AuthController {
 
   //Logout API Endpoint
   @authenticate('jwt')
-  @get('/auth/logout')
-  @response(200, {
-    description: 'Logout API Endpoint',
+  @get('/auth/logout', {
+    summary: 'Logout current logged in user',
+    responses: {
+      '200': {},
+    },
   })
   async logout(
     @inject(SecurityBindings.USER)
@@ -209,17 +299,21 @@ export class AuthController {
   }
 
   // ForgotPassword API Endpoint
-  @post('/auth/forgot-password')
-  @response(200, {
-    description: 'Generate token for forgot password',
-    content: {
-      'application/json': {
-        schema: {
-          type: 'object',
-          properties: {
-            emailId: {
-              type: 'string',
-              format: 'email',
+  @post('/auth/forgot-password', {
+    summary: 'Forgot Password',
+    responses: {
+      '200': {
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: {
+                emailId: {
+                  type: 'string',
+                  format: 'email',
+                  default: 'user@linearloop.io'
+                },
+              },
             },
           },
         },
@@ -237,6 +331,7 @@ export class AuthController {
               emailId: {
                 type: 'string',
                 format: 'email',
+                default: 'user@linearloop.io'
               },
             },
           },
@@ -251,25 +346,28 @@ export class AuthController {
   }
 
   //  ResetPassword API Endpoint
-  @post('/auth/reset-password')
-  @response(200, {
-    description: 'Reset user password',
-    content: {
-      'application/json': {
-        schema: {
-          type: 'object',
-          properties: {
-            token: {
-              type: 'string',
-              default: '',
-            },
-            newPassword: {
-              type: 'string',
-              default: '',
-            },
-            confirmPassword: {
-              type: 'string',
-              default: '',
+  @post('/auth/reset-password', {
+    summary: 'Reset Password with token',
+    responses: {
+      '200': {
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: {
+                token: {
+                  type: 'string',
+                  default: '',
+                },
+                newPassword: {
+                  type: 'string',
+                  default: '',
+                },
+                confirmPassword: {
+                  type: 'string',
+                  default: '',
+                },
+              },
             },
           },
         },
@@ -317,21 +415,25 @@ export class AuthController {
 
   // ChnagePassword API Endpoint
   @authenticate('jwt')
-  @post('/auth/change-password')
-  @response(200, {
-    description: 'Change user password',
-    content: {
-      'application/json': {
-        schema: {
-          type: 'object',
-          properties: {
-            oldPassword: {
-              type: 'string',
-              default: '',
-            },
-            newPassword: {
-              type: 'string',
-              default: '',
+  @post('/auth/change-password', {
+    summary: 'Change password of logged in user',
+    responses: {
+      '200': {
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: {
+                oldPassword: {
+                  type: 'string',
+                },
+                newPassword: {
+                  type: 'string',
+                },
+                confirmNewPassword: {
+                  type: 'string',
+                },
+              },
             },
           },
         },
@@ -360,6 +462,10 @@ export class AuthController {
                 },
                 default: '',
               },
+              confirmNewPassword: {
+                type: 'string',
+                default: '',
+              },
             },
           },
         },
@@ -368,6 +474,7 @@ export class AuthController {
     payload: {
       oldPassword: string;
       newPassword: string;
+      confirmNewPassword: string;
     },
     @inject(SecurityBindings.USER)
     authCredentials: AuthCredentials,
@@ -381,9 +488,9 @@ export class AuthController {
   //WhoAmI API Endpoint - To get the logged in user's data
   @authenticate('jwt')
   @get('auth/whoAmI', {
+    summary: 'Get info of logged in user',
     responses: {
       '200': {
-        description: "WhoAmI API Endpoint - To get the logged in user's data",
         content: {
           'application/json': {
             schema: {

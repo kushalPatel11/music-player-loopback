@@ -13,4 +13,14 @@ export class TracksRepository extends DefaultCrudRepository<
   ) {
     super(Tracks, dataSource);
   }
+
+  definePersistedModel(entityClass: typeof Tracks) {
+    const modelClass = super.definePersistedModel(entityClass);
+    modelClass.observe('before save', async ctx => {
+      if (!ctx.isNewInstance && ctx.data) {
+        ctx.data.updatedAt = new Date();
+      }
+    });
+    return modelClass;
+  }
 }

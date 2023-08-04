@@ -6,3 +6,4 @@ export * from './track-has-artist.model';
 export * from './tracks.model';
 export * from './user-credntials.model';
 export * from './users.model';
+export * from './playlist-has-users.model';

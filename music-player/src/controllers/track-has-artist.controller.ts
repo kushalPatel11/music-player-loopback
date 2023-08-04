@@ -7,16 +7,16 @@ import {
   Where,
 } from '@loopback/repository';
 import {
-  post,
-  param,
+  del,
   get,
   getModelSchemaRef,
+  OperationVisibility,
+  param,
   patch,
+  post,
   put,
-  del,
   requestBody,
   response,
-  OperationVisibility,
   visibility,
 } from '@loopback/rest';
 import {TrackHasArtist} from '../models';
@@ -26,7 +26,7 @@ import {TrackHasArtistRepository} from '../repositories';
 export class TrackHasArtistController {
   constructor(
     @repository(TrackHasArtistRepository)
-    public trackHasArtistRepository : TrackHasArtistRepository,
+    public trackHasArtistRepository: TrackHasArtistRepository,
   ) {}
 
   @post('/track-has-artists')
@@ -40,7 +40,6 @@ export class TrackHasArtistController {
         'application/json': {
           schema: getModelSchemaRef(TrackHasArtist, {
             title: 'NewTrackHasArtist',
-
           }),
         },
       },
@@ -109,7 +108,8 @@ export class TrackHasArtistController {
   })
   async findById(
     @param.path.string('id') id: string,
-    @param.filter(TrackHasArtist, {exclude: 'where'}) filter?: FilterExcludingWhere<TrackHasArtist>
+    @param.filter(TrackHasArtist, {exclude: 'where'})
+    filter?: FilterExcludingWhere<TrackHasArtist>,
   ): Promise<TrackHasArtist> {
     return this.trackHasArtistRepository.findById(id, filter);
   }

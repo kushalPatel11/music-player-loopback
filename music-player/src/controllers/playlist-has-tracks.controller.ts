@@ -7,17 +7,17 @@ import {
   Where,
 } from '@loopback/repository';
 import {
-  post,
-  param,
+  del,
   get,
   getModelSchemaRef,
+  OperationVisibility,
+  param,
   patch,
+  post,
   put,
-  del,
   requestBody,
   response,
   visibility,
-  OperationVisibility,
 } from '@loopback/rest';
 import {PlaylistHasTracks} from '../models';
 import {PlaylistHasTracksRepository} from '../repositories';
@@ -26,13 +26,15 @@ import {PlaylistHasTracksRepository} from '../repositories';
 export class PlaylistHasTracksController {
   constructor(
     @repository(PlaylistHasTracksRepository)
-    public playlistHasTracksRepository : PlaylistHasTracksRepository,
+    public playlistHasTracksRepository: PlaylistHasTracksRepository,
   ) {}
 
   @post('/playlist-has-tracks')
   @response(200, {
     description: 'PlaylistHasTracks model instance',
-    content: {'application/json': {schema: getModelSchemaRef(PlaylistHasTracks)}},
+    content: {
+      'application/json': {schema: getModelSchemaRef(PlaylistHasTracks)},
+    },
   })
   async create(
     @requestBody({
@@ -109,7 +111,8 @@ export class PlaylistHasTracksController {
   })
   async findById(
     @param.path.string('id') id: string,
-    @param.filter(PlaylistHasTracks, {exclude: 'where'}) filter?: FilterExcludingWhere<PlaylistHasTracks>
+    @param.filter(PlaylistHasTracks, {exclude: 'where'})
+    filter?: FilterExcludingWhere<PlaylistHasTracks>,
   ): Promise<PlaylistHasTracks> {
     return this.playlistHasTracksRepository.findById(id, filter);
   }

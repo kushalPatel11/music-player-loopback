@@ -60,12 +60,9 @@ type changePasswordParams = {
   payload: {
     oldPassword: string;
     newPassword: string;
+    confirmNewPassword: string;
   };
   userId: string;
-};
-
-type findUserTypeParams = {
-  userType: string;
 };
 
 @injectable({scope: BindingScope.TRANSIENT})
@@ -111,7 +108,7 @@ export class UserService {
     });
     if (!userCredentials) {
       throw new HttpErrors.BadRequest(
-        customErrorMsg.authErrors.USER_PASSWORD_NOT_SET,
+        customErrorMsg.authErrors.USER_ID_NOT_FOUND,
       );
     }
 
@@ -141,35 +138,7 @@ export class UserService {
       }),
     });
 
-    return {
-      session: userSession,
-      user,
-    };
-
-    // let token = jwt.sign(
-    //   {userId: user.id, userType: user.userType, email: user.email},
-    //   key,
-    //   {
-    //     expiresIn: 84600,
-    //   },
-    // );
-
-    // const session = new Session({
-    //   userId: user.id,
-    //   jwt: token,
-    //   status: musicPlayerConstant.SessionStatus.CURRENT,
-    //   loginAt: <any>DateTime.utc().toISO(),
-    //   expireAt: <any>DateTime.utc().plus({hours: 24}).toJSDate(),
-    //   expiredAt: <any>null,
-    // });
-    // // console.log(session);
-
-    // const createdSession = await this.sessionRepository.create(session);
-    // return `${musicPlayerConstant.AuthStatus.LOG_IN_SUCCESS}, your session token is ${createdSession.jwt}`;
-    // return this.userAuthenticationService.userLogin(
-    //   payload.email,
-    //   payload.password,
-    // );
+    return userSession.jwt;
   }
 
   async logout({sessionId}: LogoutParams) {
@@ -283,7 +252,7 @@ export class UserService {
     });
     if (!checkUserId) {
       throw new HttpErrors[404](
-        customErrorMsg.authErrors.USER_PASSWORD_NOT_SET,
+        customErrorMsg.authErrors.USER_ID_NOT_FOUND,
       );
     }
 
@@ -299,6 +268,10 @@ export class UserService {
       throw new HttpErrors[403](
         customErrorMsg.authErrors.PASSWORD_CANT_BE_SAME,
       );
+    }
+
+    if (payload.newPassword !== payload.confirmNewPassword) {
+      throw new HttpErrors[403](customErrorMsg.authErrors.PASSWORDS_DONT_MATCH);
     }
 
     const passwordArray = checkUserId.oldPasswords;
@@ -325,16 +298,21 @@ export class UserService {
     return musicPlayerConstant.AuthStatus.PASSWORD_CHANGE_SUCCESSFULL;
   }
 
-  async findUserType({userType}: findUserTypeParams) {
+  async findUserType(userType: string) {
     const checkUserType = await this.usersRepository.find({
       where: {
         userType: userType,
       },
-      fields: {
-        id: true,
-      },
     });
-    return checkUserType;
+
+    const customArray = checkUserType.map(prop => {
+      let obj = {
+        id: prop.id,
+        name: `${prop.firstName} ${prop.lastName}`,
+      };
+      return obj;
+    });
+    return customArray;
   }
 
   async findUserById(id: string): Promise<Users & UsersWithRelations> {

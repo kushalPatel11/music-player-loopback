@@ -1,7 +1,7 @@
 import {TokenService} from '@loopback/authentication';
 import {inject, service} from '@loopback/core';
 import {repository} from '@loopback/repository';
-import {OperationVisibility, requestBody, response, visibility,get, post} from '@loopback/rest';
+import {get, param} from '@loopback/rest';
 import {TokenServiceBindings} from '../keys';
 import {UsersRepository} from '../repositories';
 import {UserService} from '../services';
@@ -17,33 +17,24 @@ export class UserController {
     public userService: UserService,
   ) {}
 
-  @post('/user')
-  @response(200,{
-    description: 'Get user type',
+  @get('/user', {
+    summary: 'List of users of mentioned userType',
+    responses: {
+      200: {},
+    },
   })
   async findUserType(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: {
-            type: 'object',
-            required: ['userType'],
-            properties: {
-              userType: {
-                type: 'string',
-                default: 'user'
-              },
-            }
-
-          }
-        },
+    @param({
+      name: 'userType',
+      in: 'query',
+      schema: {
+        type: 'string',
+        enum: ['user', 'artist'],
+        default: 'artist',
       },
     })
-    payload:{
-      userType: string;
-    }
-  ):Promise<any>{
-    return this.userService.findUserType(payload)
+    userType: string,
+  ): Promise<any> {
+    return this.userService.findUserType(userType);
   }
-
 }

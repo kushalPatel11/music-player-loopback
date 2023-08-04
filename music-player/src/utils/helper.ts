@@ -1,5 +1,6 @@
 import {HttpErrors} from '@loopback/rest';
 import {compare} from 'bcryptjs';
+import {readFileSync} from 'fs';
 import _ from 'lodash';
 import {customErrorMsg} from '../keys';
 
@@ -14,6 +15,7 @@ export const generateRandomString = (length: number) => {
   return randomString;
 };
 
+// Will check all the old passwords from the array and throws error if new password matches in the array
 export const checkOldPasswords = async (
   newPassword: string,
   oldPassword: string[],
@@ -31,10 +33,28 @@ export const omitId = async (object: object) => {
   return omitId;
 };
 
-export const checkArtistDuplication = async (artistArray: string[]) => {
-  const arrLength = artistArray.length;
-  const uniqueSet = new Set(artistArray);
-  if (!(arrLength === uniqueSet.size)) {
-    throw new HttpErrors[406](customErrorMsg.trackErrors.DUPLICATE_ARTIST_ID);
+// check whether there are unique ids in the array or not
+export const checkDataDuplication = async (dataArray: string[]) => {
+  if (dataArray.length !== [...new Set(dataArray)].length) {
+    throw new HttpErrors[406](customErrorMsg.commonFunctionErrors.DUPLICATE_ID);
   }
 };
+
+// Removes the key: "id" and only returns its value in the form of string[]
+export const extractIds = async (data: {id: string}[]): Promise<string[]> => {
+  return data.map(item => item.id);
+};
+
+export const compareFiles = (file1Path: string, file2Path: string) => {
+  const file1Data = readFileSync(file1Path);
+  const file2Data = readFileSync(file2Path);
+
+  const checkFile = file1Data.equals(file2Data);
+
+  return checkFile;
+};
+
+let filePath = 'C:/Users/HP VICTUS/Pictures/download(1).jpg';
+let newFilePath = 'C:/Users/HP VICTUS/Pictures/download(1).pdf';
+
+// console.log(compareFiles(filePath, newFilePath));

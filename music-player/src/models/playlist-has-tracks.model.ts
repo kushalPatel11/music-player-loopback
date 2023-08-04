@@ -1,8 +1,8 @@
 import {Entity, belongsTo, model, property} from '@loopback/repository';
-import { Playlists } from './playlists.model';
-import { Tracks } from './tracks.model';
-import { Users } from './users.model';
-import { DateTime } from 'luxon';
+import {DateTime} from 'luxon';
+import {Playlists} from './playlists.model';
+import {Tracks} from './tracks.model';
+import {Users} from './users.model';
 
 @model()
 export class PlaylistHasTracks extends Entity {
@@ -13,54 +13,54 @@ export class PlaylistHasTracks extends Entity {
   })
   id?: string;
 
-    @belongsTo(
-    () =>Playlists,
+  @belongsTo(
+    () => Playlists,
     {
-      name : 'playlist',
+      name: 'playlist',
     },
     {
-      type : 'string',
+      type: 'string',
       required: true,
-      mongodb: {dataType : 'ObjectId'},
+      mongodb: {dataType: 'ObjectId'},
     },
   )
   playlistsId: string;
 
   @belongsTo(
-    () =>Tracks,
+    () => Tracks,
     {
-      name : 'tracks',
+      name: 'tracks',
     },
     {
-      type : 'string',
+      type: 'string',
       required: true,
-      mongodb: {dataType : 'ObjectId'},
+      mongodb: {dataType: 'ObjectId'},
     },
   )
   tracksId: string;
 
   @belongsTo(
-    () =>Users,
+    () => Users,
     {
-      name : 'users',
+      name: 'users',
     },
     {
-      type : 'string',
+      type: 'string',
       required: true,
-      mongodb: {dataType : 'ObjectId'},
+      mongodb: {dataType: 'ObjectId'},
     },
   )
   createdBy: string;
 
   @belongsTo(
-    () =>Users,
+    () => Users,
     {
-      name : 'users',
+      name: 'users',
     },
     {
-      type : 'string',
+      type: 'string',
       required: true,
-      mongodb: {dataType : 'ObjectId'},
+      mongodb: {dataType: 'ObjectId'},
     },
   )
   updatedBy: string;
@@ -68,14 +68,14 @@ export class PlaylistHasTracks extends Entity {
   @property({
     type: 'date',
     required: true,
-    default:()=> DateTime.utc().toJSDate(),
+    default: () => DateTime.utc().toJSDate(),
   })
   createdAt: DateTime;
 
   @property({
     type: 'date',
     required: true,
-    default:()=> DateTime.utc().toJSDate(),
+    default: () => DateTime.utc().toJSDate(),
   })
   updateAt: DateTime;
 
@@ -88,4 +88,5 @@ export interface PlaylistHasTracksRelations {
   // describe navigational properties here
 }
 
-export type PlaylistHasTracksWithRelations = PlaylistHasTracks & PlaylistHasTracksRelations;
+export type PlaylistHasTracksWithRelations = PlaylistHasTracks &
+  PlaylistHasTracksRelations;

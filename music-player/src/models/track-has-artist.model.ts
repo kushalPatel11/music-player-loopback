@@ -1,7 +1,7 @@
 import {Entity, belongsTo, model, property} from '@loopback/repository';
-import { Users } from './users.model';
-import { Tracks } from './tracks.model';
-import { DateTime } from 'luxon';
+import {DateTime} from 'luxon';
+import {Tracks} from './tracks.model';
+import {Users} from './users.model';
 
 @model()
 export class TrackHasArtist extends Entity {
@@ -13,42 +13,62 @@ export class TrackHasArtist extends Entity {
   id?: string;
 
   @belongsTo(
-    () =>Users,
+    () => Users,
     {
-      name : 'users',
+      name: 'users',
     },
     {
-      type : 'string',
+      type: 'string',
       required: true,
-      mongodb: {dataType : 'ObjectId'},
+      mongodb: {dataType: 'ObjectId'},
     },
   )
   artistId: string;
 
   @belongsTo(
-    () =>Tracks,
+    () => Tracks,
     {
-      name : 'tracks',
+      name: 'tracks',
     },
     {
-      type : 'string',
+      type: 'string',
       required: true,
-      mongodb: {dataType : 'ObjectId'},
+      mongodb: {dataType: 'ObjectId'},
     },
   )
   tracksId: string;
 
   @property({
+    type: 'string',
+    required: false,
+    default: null,
+  })
+  collaborationToken: string;
+
+  @property({
+    type: 'string',
+    required: false,
+    jsonSchema: {
+      enum: ['pending', 'accepted', 'rejected'],
+      errormessage: {
+        pattern: `Choose from pending, accepted, rejected only!!`,
+      },
+    },
+    default: 'pending',
+  })
+  collaborationStatus: string;
+
+  @property({
     type: 'date',
     required: true,
-    default: DateTime.utc().toJSDate()
+    default: DateTime.utc().toJSDate(),
   })
   createdAt: DateTime;
 
   @property({
     type: 'date',
     required: true,
-    default: DateTime.utc().toJSDate()
+    default: DateTime.utc().toJSDate(),
   })
   updatedAt: DateTime;
 
@@ -61,4 +81,5 @@ export interface TrackHasArtistRelations {
   // describe navigational properties here
 }
 
-export type TrackHasArtistWithRelations = TrackHasArtist & TrackHasArtistRelations;
+export type TrackHasArtistWithRelations = TrackHasArtist &
+  TrackHasArtistRelations;

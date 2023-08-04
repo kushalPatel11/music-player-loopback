@@ -1,9 +1,10 @@
 import {Entity, belongsTo, model, property} from '@loopback/repository';
 import {DateTime} from 'luxon';
+import {Playlists} from './playlists.model';
 import {Users} from './users.model';
 
 @model()
-export class Playlists extends Entity {
+export class PlaylistHasUsers extends Entity {
   @property({
     type: 'string',
     id: true,
@@ -11,56 +12,50 @@ export class Playlists extends Entity {
   })
   id?: string;
 
-  @property({
-    type: 'string',
-    required: true,
-  })
-  name: string;
+  @belongsTo(
+    () => Playlists,
+    {
+      name: 'playlists',
+    },
+    {
+      type: 'string',
+      required: true,
+      mongodb: {dataType: 'ObjectId'},
+    },
+  )
+  playlistId: string;
+
+  @belongsTo(
+    () => Users,
+    {
+      name: 'users',
+    },
+    {
+      type: 'string',
+      required: true,
+      mongodb: {dataType: 'ObjectId'},
+    },
+  )
+  userId: string;
 
   @property({
     type: 'string',
     required: true,
   })
-  description: string;
+  invitationToken: string;
 
   @property({
     type: 'string',
-    default: null,
+    required: false,
     jsonSchema: {
-      format: 'url',
+      enum: ['pending', 'accepted', 'rejected'],
       errorMessage: {
-        pattern: `Invalid url`,
+        pattern: `choose from pending, accepted or rejected only!`,
       },
-      nullable: true,
     },
+    default: 'pending',
   })
-  logo?: string;
-
-  @belongsTo(
-    () => Users,
-    {
-      name: 'users',
-    },
-    {
-      type: 'string',
-      required: true,
-      mongodb: {dataType: 'ObjectId'},
-    },
-  )
-  createdBy: string;
-
-  @belongsTo(
-    () => Users,
-    {
-      name: 'users',
-    },
-    {
-      type: 'string',
-      required: true,
-      mongodb: {dataType: 'ObjectId'},
-    },
-  )
-  updatedBy: string;
+  status: string;
 
   @property({
     type: 'date',
@@ -76,14 +71,14 @@ export class Playlists extends Entity {
   })
   updatedAt: DateTime;
 
-  constructor(data?: Partial<Playlists>) {
+  constructor(data?: Partial<PlaylistHasUsers>) {
     super(data);
   }
 }
 
-export interface PlaylistsRelations {
+export interface PlaylistHasUsersRelations {
   // describe navigational properties here
-  createdByUser?: Users;
 }
 
-export type PlaylistsWithRelations = Playlists & PlaylistsRelations;
+export type PlaylistHasUsersWithRelations = PlaylistHasUsers &
+  PlaylistHasUsersRelations;
